@@ -32,7 +32,6 @@ SaxHandler::SaxHandler() : QXmlDefaultHandler() {
   is_simple_pattern = FALSE;
   is_text_pattern = FALSE;
   cover = NULL;
-  /*TEMP*/found_suffix = FALSE;
 }
 
 SaxHandler::~SaxHandler() {
@@ -192,8 +191,10 @@ bool SaxHandler::startElement(const QString& namespaceURI, const QString &localN
     }
   }
 
-  if ((is_filename_pattern) || (is_simple_pattern)) {
-    if (qName == VAR_SUFFIX) { /*TEMP*/found_suffix = TRUE; p_element += suffix; }
+  if ((is_command_pattern) || (is_filename_pattern) || (is_simple_pattern)) {
+    if (qName == VAR_SUFFIX) {
+      p_element += suffix;
+    }
   }
 
   if (is_command_pattern) {
@@ -503,6 +504,23 @@ const QString PatternParser::parseCommandPattern(const QString& pattern,
   handler.setDemoMode(demomode);
   handler.set2DigitsTrackNum(FALSE);
   handler.setEncoder(encoder);
+
+  QXmlInputSource inputSource;
+  inputSource.setData("<commandpattern>"+p_xmlize_pattern(pattern)+"</commandpattern>");
+  QXmlSimpleReader reader;
+  reader.setContentHandler(&handler);
+  reader.setErrorHandler(&handler);
+  reader.parse(inputSource);
+
+  return handler.text();
+
+}
+
+const QString PatternParser::parseReplayGainCommandPattern(const QString& pattern,
+        const QString& suffix) {
+
+  SaxHandler handler;
+  handler.setSuffix(suffix);
 
   QXmlInputSource inputSource;
   inputSource.setData("<commandpattern>"+p_xmlize_pattern(pattern)+"</commandpattern>");

@@ -30,6 +30,7 @@ Audex::Audex(QWidget* parent, ProfileModel *profile_model, CDDAModel *cdda_model
   p_profile_name = profile_model->data(profile_model->index(profile_model->currentProfileRow(), PROFILE_MODEL_COLUMN_NAME_INDEX)).toString();
   p_suffix = profile_model->getSelectedEncoderSuffixFromCurrentIndex();
   p_single_file = profile_model->data(profile_model->index(profile_model->currentProfileRow(), PROFILE_MODEL_COLUMN_SF_INDEX)).toBool();
+  p_replaygain = profile_model->data(profile_model->index(profile_model->currentProfileRow(), PROFILE_MODEL_COLUMN_RG_INDEX)).toBool();
 
   encoder_wrapper = new EncoderWrapper(this,
                         profile_model->getSelectedEncoderPatternFromCurrentIndex(),
@@ -681,6 +682,15 @@ void Audex::execute_finish() {
   QString target_single_filename;
   if (p_single_file) {
     target_single_filename = cdda_model->customData("filename").toString();
+  }
+
+  // Apply ReplayGain
+  if (_finished_successful && p_replaygain) {
+
+    ReplayGainWrapper replaygain_wrapper(this, profile_model->getSelectedReplayGainPatternFromCurrentIndex());
+    connect(&replaygain_wrapper, SIGNAL(info(const QString&)), this, SLOT(slot_info(const QString&)));
+    connect(&replaygain_wrapper, SIGNAL(error(const QString&, const QString&)), this, SLOT(slot_error(const QString&, const QString&)));
+    _finished_successful = replaygain_wrapper.calculate(p_suffix, target_dir);
   }
 
   QString co;

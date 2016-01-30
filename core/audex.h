@@ -35,6 +35,7 @@
 #include "utils/cddaextractthread.h"
 #include "utils/wavefilewriter.h"
 #include "utils/encoderwrapper.h"
+#include "utils/replaygainwrapper.h"
 #include "utils/tmpdir.h"
 #include "utils/upload.h"
 #include "utils/hashlist.h"
@@ -179,6 +180,7 @@ private:
   ProfileModel *profile_model;
   CDDAModel *cdda_model;
   EncoderWrapper *encoder_wrapper;
+  ReplayGainWrapper *replaygain_wrapper;
   CDDAExtractThread *cdda_extract_thread;
   AudexJobs *jobs;
   WaveFileWriter *wave_file_writer;
@@ -187,6 +189,7 @@ private:
   QString p_profile_name;
   QString p_suffix;
   bool p_single_file;
+  bool p_replaygain;
 
   bool construct_target_filename(QString& targetFilename,
         int trackno, int cdno, int nooftracks, int gindex,

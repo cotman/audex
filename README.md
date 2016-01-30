@@ -11,19 +11,27 @@ Audex is an audio grabber tool for CD-ROM drives for the KDE desktop.
 
 ### Prerequisites (optional)
 
+#### Encoding
+
 * Ogg Vorbis (ogg files)
 * FLAC (flac files)
 * LAME (mp3 files)
 * FAAC (mp4/aac files)
 * eyeD3 (mp3 tagging)
 
+#### ReplayGain
+
+* vorbisgain (ogg files)
+* metaflac (flac files)
+* python-rgain (mp4/aac, mp3 and custom files)
+
 ### Compile
 
-mkdir build
-cd build
-cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr ..
-make
-(sudo) make install
+    mkdir build
+    cd build
+    cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr ..
+    make
+    (sudo) make install
 
 ### Further information
 

@@ -85,6 +85,7 @@ QVariant ProfileModel::data(const QModelIndex &index, int role) const {
       case PROFILE_MODEL_COLUMN_CUE_NAME_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_CUE_NAME_KEY];
       case PROFILE_MODEL_COLUMN_SF_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_SF_KEY];
       case PROFILE_MODEL_COLUMN_SF_NAME_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_SF_NAME_KEY];
+      case PROFILE_MODEL_COLUMN_RG_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_RG_KEY];
       case PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY];
       case PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY];
       case PROFILE_MODEL_COLUMN_ENCODER_FLAC_PARAMETERS_INDEX : return p_cache.at(index.row())[PROFILE_MODEL_COLUMN_ENCODER_FLAC_PARAMETERS_KEY];
@@ -273,6 +274,7 @@ bool ProfileModel::setData(const QModelIndex &index, const QVariant &value, int 
 	    return FALSE;
 	  }
 	  break;
+	case PROFILE_MODEL_COLUMN_RG_INDEX : break;
 	case PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_INDEX : break;
         case PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_INDEX : break;
         case PROFILE_MODEL_COLUMN_ENCODER_FLAC_PARAMETERS_INDEX : break;
@@ -349,6 +351,7 @@ bool ProfileModel::setData(const QModelIndex &index, const QVariant &value, int 
         case PROFILE_MODEL_COLUMN_CUE_NAME_INDEX : p_cache[index.row()][PROFILE_MODEL_CUE_NAME_KEY] = value; break;
         case PROFILE_MODEL_COLUMN_SF_INDEX : p_cache[index.row()][PROFILE_MODEL_SF_KEY] = value; break;
         case PROFILE_MODEL_COLUMN_SF_NAME_INDEX : p_cache[index.row()][PROFILE_MODEL_SF_NAME_KEY] = value; break;
+        case PROFILE_MODEL_COLUMN_RG_INDEX : p_cache[index.row()][PROFILE_MODEL_RG_KEY] = value; break;
 
         case PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_INDEX : p_cache[index.row()][PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY] = value; break;
         case PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_INDEX : p_cache[index.row()][PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY] = value; break;
@@ -724,6 +727,14 @@ const QString ProfileModel::getSelectedEncoderSuffixFromCurrentIndex() {
 
 }
 
+const QString ProfileModel::getSelectedReplayGainPatternFromCurrentIndex() {
+
+  EncoderAssistant::Encoder encoder = getSelectedEncoderFromCurrentIndex();
+
+  return ReplayGainAssistant::pattern(encoder);
+
+}
+
 const QString ProfileModel::getSelectedEncoderNameAndVersion() {
 
   EncoderAssistant::Encoder encoder = getSelectedEncoderFromCurrentIndex();
@@ -777,6 +788,7 @@ const Profile ProfileModel::p_new_profile() {
   p[PROFILE_MODEL_CUE_NAME_KEY] = DEFAULT_CUE_NAME;
   p[PROFILE_MODEL_SF_KEY] = DEFAULT_SF;
   p[PROFILE_MODEL_SF_NAME_KEY] = DEFAULT_SF_NAME;
+  p[PROFILE_MODEL_RG_KEY] = DEFAULT_RG;
 
   p[PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY] = DEFAULT_ENCODER_PARAMETERS;
   p[PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY] = DEFAULT_ENCODER_PARAMETERS;
@@ -882,6 +894,7 @@ void ProfileModel::p_save(KConfig *config) {
     subGroup.writeEntry(PROFILE_MODEL_CUE_NAME_KEY, p_cache[i][PROFILE_MODEL_CUE_NAME_KEY]);
     subGroup.writeEntry(PROFILE_MODEL_SF_KEY, p_cache[i][PROFILE_MODEL_SF_KEY]);
     subGroup.writeEntry(PROFILE_MODEL_SF_NAME_KEY, p_cache[i][PROFILE_MODEL_SF_NAME_KEY]);
+    subGroup.writeEntry(PROFILE_MODEL_RG_KEY, p_cache[i][PROFILE_MODEL_RG_KEY]);
 
     subGroup.writeEntry(PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY, p_cache[i][PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY]);
     subGroup.writeEntry(PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY, p_cache[i][PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY]);
@@ -940,6 +953,7 @@ void ProfileModel::p_load(KConfig *config) {
     p[PROFILE_MODEL_CUE_NAME_KEY] = subGroup.readEntry(PROFILE_MODEL_CUE_NAME_KEY, DEFAULT_CUE_NAME);
     p[PROFILE_MODEL_SF_KEY] = subGroup.readEntry(PROFILE_MODEL_SF_KEY, DEFAULT_SF);
     p[PROFILE_MODEL_SF_NAME_KEY] = subGroup.readEntry(PROFILE_MODEL_SF_NAME_KEY, DEFAULT_SF_NAME);
+    p[PROFILE_MODEL_RG_KEY] = subGroup.readEntry(PROFILE_MODEL_RG_KEY, DEFAULT_RG);
 
     p[PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY] = subGroup.readEntry(PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY, DEFAULT_ENCODER_PARAMETERS);
     p[PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY] = subGroup.readEntry(PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY, DEFAULT_ENCODER_PARAMETERS);
