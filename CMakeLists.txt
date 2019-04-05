@@ -82,9 +82,11 @@ set(audex_SRCS
   utils/cddaparanoia.cpp
   utils/cddadevices.cpp
   utils/encoderwrapper.cpp
+  utils/replaygainwrapper.cpp
   utils/cddaextractthread.cpp
   utils/upload.cpp
   utils/encoderassistant.cpp
+  utils/replaygainassistant.cpp
   utils/hashlist.cpp
   utils/3rdparty/crc32.cpp
   utils/parameters.cpp

@@ -25,6 +25,7 @@
 #include "utils/error.h"
 #include "utils/parameters.h"
 #include "utils/encoderassistant.h"
+#include "utils/replaygainassistant.h"
 
 #include "ui_flacwidgetUI.h"
 

@@ -165,6 +165,9 @@ ProfileDataDialog::ProfileDataDialog(ProfileModel *profileModel, const int profi
     enable_settings_singlefile(ui.checkBox_singlefile->isChecked());
     connect(ui.checkBox_singlefile, SIGNAL(toggled(bool)), this, SLOT(trigger_changed()));
 
+    ui.checkBox_replaygain->setChecked(profile_model->data(profile_model->index(profile_row, PROFILE_MODEL_COLUMN_RG_INDEX)).toBool());
+    connect(ui.checkBox_replaygain, SIGNAL(toggled(bool)), this, SLOT(trigger_changed()));
+
     disable_playlist(ui.checkBox_singlefile->isChecked());
 
     //profile data cover data
@@ -226,6 +229,10 @@ ProfileDataDialog::ProfileDataDialog(ProfileModel *profileModel, const int profi
     ui.checkBox_hashlist->setChecked(DEFAULT_HL);
     ui.checkBox_cuesheet->setChecked(DEFAULT_CUE);
     ui.checkBox_singlefile->setChecked(DEFAULT_SF);
+    ui.checkBox_replaygain->setEnabled(
+      ReplayGainAssistant::available((EncoderAssistant::Encoder)DEFAULT_ENCODER_SELECTED)
+    );
+    ui.checkBox_replaygain->setChecked(DEFAULT_RG);
     pdcd_scale = DEFAULT_SC_SCALE;
     pdcd_size = DEFAULT_SC_SIZE;
     pdcd_format = DEFAULT_SC_FORMAT;
@@ -289,12 +296,22 @@ void ProfileDataDialog::set_encoder(const int encoder)
 
   ui.kcombobox_encoder->setCurrentIndex(ui.kcombobox_encoder->findData(encoder));
 
+  ui.checkBox_replaygain->setEnabled(
+    ReplayGainAssistant::available((EncoderAssistant::Encoder)encoder)
+  );
+
 }
 
 void ProfileDataDialog::set_encoder_by_combobox(const int index)
 {
 
-   set_encoder_widget((EncoderAssistant::Encoder)ui.kcombobox_encoder->itemData(index).toInt());
+  EncoderAssistant::Encoder encoder = (EncoderAssistant::Encoder)ui.kcombobox_encoder->itemData(index).toInt();
+
+  set_encoder_widget(encoder);
+
+  ui.checkBox_replaygain->setEnabled(
+    ReplayGainAssistant::available(encoder)
+  );
 
 }
 
@@ -331,6 +348,7 @@ void ProfileDataDialog::trigger_changed()
       pdsd_pattern != profile_model->data(profile_model->index(profile_row, PROFILE_MODEL_COLUMN_SF_NAME_INDEX)).toString() ||
       ui.checkBox_cuesheet->isChecked() != profile_model->data(profile_model->index(profile_row, PROFILE_MODEL_COLUMN_CUE_INDEX)).toBool() ||
       ui.checkBox_singlefile->isChecked() != profile_model->data(profile_model->index(profile_row, PROFILE_MODEL_COLUMN_SF_INDEX)).toBool() ||
+      ui.checkBox_replaygain->isChecked() != profile_model->data(profile_model->index(profile_row, PROFILE_MODEL_COLUMN_RG_INDEX)).toBool() ||
       lame_widget->isChanged() ||
       oggenc_widget->isChanged() ||
       flac_widget->isChanged() ||

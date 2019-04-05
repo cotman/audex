@@ -31,6 +31,7 @@
 
 #include "utils/error.h"
 #include "utils/encoderassistant.h"
+#include "utils/replaygainassistant.h"
 
 #define DEFAULT_PROFILEINDEX		-1
 #define DEFAULT_NAME			""
@@ -73,6 +74,8 @@
 #define DEFAULT_SF			false
 #define DEFAULT_SF_NAME			"$" VAR_ALBUM_ARTIST"/$" VAR_ALBUM_TITLE"/$" VAR_ALBUM_ARTIST" - $" VAR_ALBUM_TITLE".$" VAR_SUFFIX
 
+#define DEFAULT_RG			false
+
 
 enum ProfileColumns {
 
@@ -114,6 +117,8 @@ enum ProfileColumns {
 
   PROFILE_MODEL_COLUMN_SF_INDEX,
   PROFILE_MODEL_COLUMN_SF_NAME_INDEX,
+
+  PROFILE_MODEL_COLUMN_RG_INDEX,
 
   PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_INDEX,
   PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_INDEX,
@@ -164,6 +169,8 @@ enum ProfileColumns {
 #define PROFILE_MODEL_SF_KEY				"sf"
 #define PROFILE_MODEL_SF_NAME_KEY			"sf_name"
 
+#define PROFILE_MODEL_RG_KEY				"rg"
+
 #define PROFILE_MODEL_COLUMN_ENCODER_LAME_PARAMETERS_KEY	"lame_parameters"
 #define PROFILE_MODEL_COLUMN_ENCODER_OGGENC_PARAMETERS_KEY	"oggenc_parameters"
 #define PROFILE_MODEL_COLUMN_ENCODER_FLAC_PARAMETERS_KEY	"flac_parameters"
@@ -211,6 +218,8 @@ public:
   const QString getSelectedEncoderSuffixFromCurrentIndex();
   const QString getSelectedEncoderNameAndVersion();
   /**END: EncoderAssistant related */
+
+  const QString getSelectedReplayGainPatternFromCurrentIndex();
 
 
   Error lastError() const;

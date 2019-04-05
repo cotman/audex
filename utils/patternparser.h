@@ -173,6 +173,9 @@ public:
         bool fat32compatible, const QString& tmppath, const QString& encoder,
         const bool demomode = false);
 
+  const QString parseReplayGainCommandPattern(const QString& pattern,
+        const QString& suffix);
+
   const QString parseSimplePattern(const QString& pattern,
         int cdno, int nooftracks,
         const QString& artist, const QString& title,
