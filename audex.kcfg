@@ -27,7 +27,7 @@
       <default>true</default>
     </entry>
     <entry name="coverLookupAuto" type="Bool">
-      <label>Perform cover lookup (amazon) automatically</label>
+      <label>Perform cover lookup (MusicBrainz) automatically</label>
       <default>true</default>
     </entry>
     <entry name="wikipediaLocale" type="Int">

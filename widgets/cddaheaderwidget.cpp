@@ -388,9 +388,9 @@ void CDDAHeaderWidget::setEnabled(bool enabled) {
   repaint();
 }
 
-void CDDAHeaderWidget::googleAuto() {
+void CDDAHeaderWidget::musicBrainzAuto() {
 
-  qDebug() << "Google AUTO cover fetch" ;
+  qDebug() << "MusicBrainz AUTO cover fetch" ;
 
   if ((cdda_model->empty()) || (fetching_cover_in_progress)) return;
 
@@ -411,7 +411,7 @@ void CDDAHeaderWidget::googleAuto() {
     title = title.left(lastColonPos);
     lastColonPos = title.lastIndexOf(':');
   }
-  cover_browser_dialog->fetchThumbnails(QString("%1 %2").arg(artist).arg(title), 1);
+  cover_browser_dialog->fetchThumbnails(artist, title, 1);
 
 }
 
@@ -564,13 +564,13 @@ void CDDAHeaderWidget::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     if ((cursor_on_cover) && (!fetching_cover_in_progress)) {
       if (cdda_model->isCoverEmpty()) {
-	if (cdda_model->empty()) {
-	  load();
-	} else {
-	  google();
-	}
+  if (cdda_model->empty()) {
+    load();
+  } else {
+    musicbrainz();
+  }
       } else {
-	view_cover();
+  view_cover();
       }
     }
     if (cursor_on_link1) edit_data();
@@ -608,16 +608,16 @@ void CDDAHeaderWidget::trigger_repaint() {
       scale_factor -= 0.08;
       if (qFuzzyCompare(scale_factor, .7) || scale_factor < .7) {
         scale_down = false;
-	fade_out = true;
+  fade_out = true;
       }
     } else if (fade_out) {
       opacity_factor -= 0.16;
       if (qFuzzyCompare(opacity_factor, 0) || opacity_factor < 0) {
         opacity_factor = 0;
-	fade_out = false;
-	animation_down = false;
-	timer.stop();
-	emit coverDown();
+  fade_out = false;
+  animation_down = false;
+  timer.stop();
+  emit coverDown();
       }
     }
 
@@ -627,16 +627,16 @@ void CDDAHeaderWidget::trigger_repaint() {
       opacity_factor += 0.16;
       if (qFuzzyCompare(opacity_factor, 1) || opacity_factor > 1) {
         opacity_factor = 1;
-	fade_in = false;
-	scale_up = true;
+  fade_in = false;
+  scale_up = true;
       }
     } else if (scale_up) {
       scale_factor += 0.08;
       if (qFuzzyCompare(scale_factor, 1) || scale_factor > 1) {
         scale_up = false;
-	animation_up = false;
-	timer.stop();
-	emit coverUp();
+  animation_up = false;
+  timer.stop();
+  emit coverUp();
       }
     }
 
@@ -655,9 +655,9 @@ void CDDAHeaderWidget::cover_is_down() {
   timer.start();
 }
 
-void CDDAHeaderWidget::google() {
+void CDDAHeaderWidget::musicbrainz() {
 
-  qDebug() << "Google cover fetch" ;
+  qDebug() << "MusicBrainz cover fetch" ;
 
   if ((cdda_model->empty()) || (fetching_cover_in_progress)) return;
 
@@ -678,7 +678,7 @@ void CDDAHeaderWidget::google() {
     title = title.left(lastColonPos);
     lastColonPos = title.lastIndexOf(':');
   }
-  cover_browser_dialog->fetchThumbnails(QString("%1 %2").arg(artist).arg(title));
+  cover_browser_dialog->fetchThumbnails(artist, title);
 
   if (cover_browser_dialog->exec() != QDialog::Accepted) {
     fetching_cover_in_progress = false;
@@ -836,9 +836,9 @@ void CDDAHeaderWidget::setup_actions() {
   action_collection = new KActionCollection(this);
 
   QAction * fetchCoverAction = new QAction(this);
-  fetchCoverAction->setText(i18n("Fetch cover from Google..."));
+  fetchCoverAction->setText(i18n("Fetch cover from MusicBrainz..."));
   action_collection->addAction("fetch", fetchCoverAction);
-  connect(fetchCoverAction, SIGNAL(triggered(bool)), this, SLOT(google()));
+  connect(fetchCoverAction, SIGNAL(triggered(bool)), this, SLOT(musicbrainz()));
 
   QAction * loadCoverAction = new QAction(this);
   loadCoverAction->setText(i18n("Set Custom Cover..."));
