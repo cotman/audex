@@ -33,11 +33,11 @@ CoverBrowserDialog::~CoverBrowserDialog() {
 
 }
 
-void CoverBrowserDialog::fetchThumbnails(const QString& searchstring, const int fetchCount) {
+void CoverBrowserDialog::fetchThumbnails(const QString& searchArtist, const QString& searchAlbum, const int fetchCount) {
   if (fetchCount == 0)
-    cover_fetcher.startFetchThumbnails(searchstring, Preferences::fetchCount());
+    cover_fetcher.startFetchThumbnails(searchArtist, searchAlbum, Preferences::fetchCount());
   else
-    cover_fetcher.startFetchThumbnails(searchstring, fetchCount);
+    cover_fetcher.startFetchThumbnails(searchArtist, searchAlbum, fetchCount);
   ui.label->setText(i18n("Searching for covers..."));
 }
 
@@ -97,7 +97,7 @@ void CoverBrowserDialog::setup() {
   static const int constIconSize=128;
 
 
-  setWindowTitle(i18n("Fetch Cover From Google"));
+  setWindowTitle(i18n("Fetch Cover From MusicBrainz"));
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   setLayout(mainLayout);

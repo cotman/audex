@@ -23,6 +23,7 @@
 */
 
 #include "coverfetcher.h"
+#include "musicbrainzjob.h"
 #include <algorithm>
 #include <QDebug>
 #include <QScriptEngine>
@@ -38,42 +39,7 @@ CoverFetcher::~CoverFetcher() {
   clear();
 }
 
-void CoverFetcher::fetched_external_ip(KJob* job) {
-
-  qDebug() << "got IP...";
-  if (!job) {
-    qDebug() << "no job error ...";
-    emit nothingFetched();
-    return;
-  } else if (job && job->error()) {
-    qDebug() << "reply error ...";
-    emit nothingFetched();
-    return;
-  }
-  // http://www.telize.com/ip returns plaintext ip address
-  KIO::StoredTransferJob* const storedJob = static_cast<KIO::StoredTransferJob*>(job);
-  external_ip = ((QString) storedJob->data()).trimmed();
-
-  qDebug() << "IP " << external_ip;
-
-  // Max images per request on Google API is 8, thus the std::min
-  QString url;
-  url= QString("https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=%1&rsz=%2&userip=%3")
-          .arg(QUrl::toPercentEncoding(search_string, "/").data())
-          .arg(std::min(fetch_no,8))
-          .arg(QUrl::toPercentEncoding(external_ip).data());
-
-  qDebug() << "searching covers (" << url << ")...";
-
-  _status = SEARCHING;
-  emit statusChanged(SEARCHING);
-
-  job = KIO::storedGet(url);
-  connect(job, SIGNAL(result(KJob*)), SLOT(fetched_html_data(KJob*)));
-
-}
-
-void CoverFetcher::startFetchThumbnails(const QString& searchstring, const int fetchNo) {
+void CoverFetcher::startFetchThumbnails(const QString& searchArtist, const QString& searchAlbum, const int fetchNo) {
 
   qDebug() << "Fetch Thumbs ...";
   if (_status != NOS || fetchNo == 0)
@@ -84,14 +50,42 @@ void CoverFetcher::startFetchThumbnails(const QString& searchstring, const int f
 
   fetch_no = fetchNo;
 
-  search_string = searchstring;
-  search_string.replace("&", "");
+  _status = SEARCHING;
+  emit statusChanged(SEARCHING);
+  
+  musicbrainz_job = new MusicBrainzJob(searchArtist, searchAlbum, fetchNo);
+  connect(musicbrainz_job, SIGNAL(finished()), SLOT(fetched_musicbrainz_cover_art_urls()));
+  musicbrainz_job->fetchCoverArtURLs();
 
-  // Google requires the user IP
-  QString url("http://www.telize.com/ip");
+}
 
-  job = KIO::storedGet(url);
-  connect(job, SIGNAL(result(KJob*)), SLOT(fetched_external_ip(KJob*)));
+void CoverFetcher::fetched_musicbrainz_cover_art_urls() {
+
+  switch (_status) {
+
+    case SEARCHING : {
+        qDebug() << "searching finished.";
+        
+        QMap<QString, QString>::iterator it;
+        
+        int cover_name = 0;
+        
+        for (it = musicbrainz_job->cover_art_urls.begin(); it != musicbrainz_job->cover_art_urls.end(); it++)
+        {
+            cover_urls_thumbnails << it.key();
+            cover_urls << it.value();
+            cover_name++;
+            cover_names << QString::number(cover_name);
+        }
+
+        _status = NOS; emit statusChanged(NOS);
+        fetch_cover_thumbnail();
+    } break;
+
+    case NOS : break;
+
+    default : break;
+  }
 
 }
 
@@ -104,6 +98,7 @@ void CoverFetcher::stopFetchThumbnails() {
   _status = NOS; emit statusChanged(NOS);
 
 }
+
 
 void CoverFetcher::startFetchCover(const int no) {
 
@@ -137,8 +132,8 @@ void CoverFetcher::fetched_html_data(KJob* job) {
   QByteArray buffer;
 
   if (job && job->error()) {
-    qDebug() << "There was an error communicating with Google. "<< job->errorString();
-    emit error(i18n("There was an error communicating with Google."), i18n("Try again later. Otherwise make a bug report."));
+    qDebug() << "There was an error communicating with MusicBrainz. "<< job->errorString();
+    emit error(i18n("There was an error communicating with MusicBrainz."), i18n("Try again later. Otherwise make a bug report."));
     _status = NOS; emit statusChanged(NOS);
     emit nothingFetched();
     return;
@@ -149,22 +144,14 @@ void CoverFetcher::fetched_html_data(KJob* job) {
   }
 
   if (buffer.count() == 0) {
-    qDebug() << "Google server: empty response";
-    emit error(i18n("Google server: Empty response."),
+    qDebug() << "MusicBrainz server: empty response";
+    emit error(i18n("MusicBrainz server: Empty response."),
                i18n("Try again later. Make a bug report."));
     _status = NOS;  emit statusChanged(NOS);
     return;
   }
 
   switch (_status) {
-
-      case SEARCHING : {
-        qDebug() << "searching finished.";
-        //qDebug() << QString::fromUtf8(buffer.data());
-        parse_html_response(QString::fromUtf8(buffer.data()));
-        _status = NOS; emit statusChanged(NOS);
-        fetch_cover_thumbnail();
-      } break;
 
       case FETCHING_THUMBNAIL : {
         qDebug() << "cover thumbnail fetched.";
@@ -182,58 +169,19 @@ void CoverFetcher::fetched_html_data(KJob* job) {
 
       case FETCHING_COVER : {
         qDebug() << "cover fetched.";
-	_status = NOS; emit statusChanged(NOS);
+  _status = NOS; emit statusChanged(NOS);
         emit fetchedCover(buffer);
       } break;
 
       case NOS : break;
 
+      default : break;
+
   }
 
 
 }
 
-void CoverFetcher::parse_html_response(const QString& xml) {
-
-  cover_urls_thumbnails.clear();
-  cover_urls.clear();
-  cover_names.clear();
-  cover_tbnids.clear();
-  cover_thumbnails.clear();
-
-  QScriptValue responseData;
-  QScriptEngine engine;
-  responseData = engine.evaluate("("+xml+")");
-
-
-  QScriptValue resultsData=responseData.property("responseData").property("results");
-
-  if (resultsData.isArray()) {
-
-    QScriptValueIterator it(resultsData);
-
-    while (it.hasNext()) {
-
-      it.next();
-      if (it.flags() & QScriptValue::SkipInEnumeration) continue;
-
-      QScriptValue entry = it.value();
-
-      QString link =  QUrl::fromPercentEncoding(entry.property("url").toString().toAscii());
-      QString thumbUrl = QUrl::fromPercentEncoding(entry.property("tbUrl").toString().toAscii());
-      QString w = entry.property("width").toString();
-      QString h = entry.property("height").toString();
-
-      cover_urls << link;
-      cover_names << i18n("%1x%2", w, h);
-      cover_urls_thumbnails << thumbUrl;
-
-      qDebug() << "URL " << link << "- " << thumbUrl<< " -"<<cover_names;
-
-    }
-
-  }
-}
 
 bool CoverFetcher::fetch_cover_thumbnail() {
 

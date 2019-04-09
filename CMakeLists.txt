@@ -22,8 +22,8 @@ find_package(ECM ${KF5_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 configure_file(config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fexceptions -Wall -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fexceptions")
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -58,6 +58,8 @@ set_package_properties(KF5Cddb PROPERTIES
   PURPOSE "libkcddb is used to retrieve audio CD meta data from the internet."
 )
 find_package(Cdparanoia REQUIRED)
+find_package(MusicBrainz REQUIRED)
+find_package(CoverArt REQUIRED)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -94,6 +96,7 @@ set(audex_SRCS
   utils/cuesheetwriter.cpp
   utils/tmpdir.cpp
   utils/discidcalculator.cpp
+  utils/musicbrainzjob.cpp
   widgets/cddaheaderwidget.cpp
   widgets/generalsettingswidget.cpp
   widgets/devicewidget.cpp
@@ -170,6 +173,8 @@ target_link_libraries(audex
     KF5::XmlGui
     KF5::Cddb
     ${CDPARANOIA_LIBRARIES}
+    ${MUSICBRAINZ_LIBRARIES}
+    ${COVERART_LIBRARIES}
 )
 
 install(TARGETS audex DESTINATION ${BIN_INSTALL_DIR})

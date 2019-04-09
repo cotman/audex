@@ -80,7 +80,7 @@ public:
 public slots:
   void setEnabled(bool enabled);
 
-  void googleAuto();
+  void musicBrainzAuto();
 
 signals:
   void headerDataChanged();
@@ -101,7 +101,7 @@ private slots:
   void trigger_repaint();
   void cover_is_down();
 
-  void google();
+  void musicbrainz();
   void load();
   void save();
   void view_cover();

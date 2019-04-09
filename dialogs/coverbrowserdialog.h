@@ -44,7 +44,7 @@ public:
   inline int count() { return cover_fetcher.count(); }
 
 public slots:
-  void fetchThumbnails(const QString& searchstring, const int fetchCount = 0);
+  void fetchThumbnails(const QString& searchArtist, const QString& searchAlbum, const int fetchCount = 0);
   void startFetchCover(const int no);
 
 signals:
